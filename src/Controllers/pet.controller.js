@@ -15,12 +15,12 @@ const registerPet = asyncHandler(async (req,res)=>{
     }
 
     const user = await User.findById(owner)
-
+    // console.log(user)
     if (!user) {
         throw new ApiError(404, "User not found")
     }
 
-    const isPetNameExist = user.pets.some(pet => pet.name.toLowerCase() === name.toLowerCase())
+    const isPetNameExist = await Pet.findOne({ name , owner });
 
     if (isPetNameExist) {
         throw new ApiError(400, "A pet with this name already exists for this user")
@@ -35,15 +35,11 @@ const registerPet = asyncHandler(async (req,res)=>{
         gender,
         owner:user._id
     })
-    // await savedPet.populate('owner', 'username email')  // Specify fields you want to populate
+   
 
-    // // Add the new pet to the user's pets array
-    // user.pets.push(savedPet._id)
-    // await user.save()
+    const registeredPet = await Pet.findById(pet._id).populate('owner', 'username email');
 
-    const registredPet = Pet.findById(pet._id).select("-owner")
-
-    if(!registredPet){
+    if(!registeredPet){
         throw new ApiError(401,"Something Went Wrong While Registering Pet")
     }
 

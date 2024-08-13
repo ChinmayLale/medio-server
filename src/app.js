@@ -19,7 +19,7 @@ app.use(cookieParser())
 
 //Routes
 import userRouter from './routes/user.routes.js'
-
+import petRouter from './routes/pet.routes.js'
 
 
 
@@ -27,7 +27,7 @@ import userRouter from './routes/user.routes.js'
 
 //Routes Declaration
 app.use("/api/v1/users",userRouter)
-
+app.use('/api/v1/pets',petRouter)
 
 
 

@@ -1,9 +1,14 @@
 import mongoose , {Schema} from "mongoose";
+import { User } from "./user.model.js";
+
+
+
 
 const petSchema = new Schema({
     name:{
         type:String,
-        required:true
+        required:true,
+        lowercase: true
     },
     age:{
         type:Number,
@@ -39,7 +44,20 @@ const petSchema = new Schema({
 
 
 
-
+petSchema.post("save",async function(doc,next){
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            doc.owner,
+            { $addToSet: { pets: doc._id } },
+            { new: true }
+        ).populate('pets');
+        
+        // console.log('User updated:', updatedUser);
+        next();
+    } catch (error) {
+        console.error('Error updating user after pet save:', error);
+    }
+})
 
 
 export const Pet = mongoose.model("Pet",petSchema)

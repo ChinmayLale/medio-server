@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import { Pet } from "../models/pet.model.js";
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/ApiError.js'
 import {ApiResponse} from "../utils/ApiResponse.js"
@@ -12,7 +13,7 @@ const generateTokens = async(userId)=>{
         
         const accessToken =await user.generateAccessToken()
         const refreshToken =await user.generateRefreshToken()
-        console.log(accessToken , refreshToken);
+        // console.log(accessToken , refreshToken);
         user.refreshToken = refreshToken
         await user.save({validateBeforeSave:false})
 
@@ -147,12 +148,26 @@ const logoutUser = asyncHandler(async(req,res)=>{
    .json(new ApiResponse(200,{},"User Logged Out"))
 })
 
+const getCurrentUser = asyncHandler(async(req, res) => {
+    const populatedUser = await req.user.populate({
+        path: 'pets',
+        select: 'name species breed age gender weight' // Include only these fields from the pet documents
+    });
 
+    return res
+    .status(200)
+    .json(new ApiResponse(
+        200,
+        populatedUser,
+        "User fetched successfully"
+    ))
+})
 
 
 
 export {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    getCurrentUser
 }
