@@ -3,7 +3,7 @@ import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/ApiError.js'
 import {ApiResponse} from "../utils/ApiResponse.js"
 import { uploadOnCloud } from "../../../Backend/src/utils/cloudinary.js";
-
+import fs from "fs"
 
 const generateTokens = async(userId)=>{
     try {
@@ -21,14 +21,14 @@ const generateTokens = async(userId)=>{
 }
 
 const registerUser = asyncHandler(async(req,res)=>{
-    const { fullName, email, username, password } = req.body
+    const { fullName, email, username, password , date_of_birth , gender , contact_number } = req.body
     
-    if (!fullName || !email || !username || !password) {
+    if (!fullName || !email || !username || !password || !date_of_birth || !gender || !contact_number) {
         throw new ApiError(400, "All fields are required");
     }
 
     // Now that we know the fields exist, we can safely trim and check for empty strings
-    if ([fullName, email, username, password].some((field) => field.trim() === "")) {
+    if ([fullName, email, username, password , date_of_birth , gender , contact_number].some((field) => field.trim() === "")) {
         throw new ApiError(400, "Empty fields are not allowed");
     }
 
@@ -41,7 +41,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     }
 
 
-    // console.log(req.files)
+    // console.log(await req.files.avatar)
     const avatarLocalPath = await req.files?.avatar?.[0]?.path || null;
     const coverImageLocalPath = await req.files?.coverImage[0]?.path || null;
     
@@ -63,8 +63,15 @@ const registerUser = asyncHandler(async(req,res)=>{
         email,
         password,
         username:username.toLowerCase(),
-        avatar:avatar.url
+        avatar:avatar.url,
+        date_of_birth,
+        gender,
+        contact_number,
     })
+
+    if(avatar.url){
+        fs.unlinkSync(avatarLocalPath);
+    }
 
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
@@ -74,6 +81,7 @@ const registerUser = asyncHandler(async(req,res)=>{
         throw new ApiError(500,"Something Went Wrong While Registering User")
     }
 
+   
   
     return res
         .status(201)

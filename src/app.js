@@ -55,7 +55,7 @@ app.use("/api/v1/doctor",doctorRouter)
 
 // Custom Error Handling 
 app.use((err, req, res, next) => {
-    // console.error(err); // Log the error for debugging
+    console.error(err); // Log the error for debugging
 
     if (err instanceof ApiError) {
         return res.status(err.statusCode).json({
@@ -71,6 +71,7 @@ app.use((err, req, res, next) => {
     return res.status(500).json({
         success: false,
         message: "An unexpected error occurred",
+        errors:err.data,
         statusCode: 500
     });
 });

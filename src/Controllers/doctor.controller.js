@@ -9,7 +9,7 @@ import fs from "fs";
 
 
 const registerDoctor = asyncHandler(async(req,res)=>{
-    const {fullName , email , password , specialization , licenseNumber , experience } = req.body
+    const {fullName , email , password , specialization , licenseNumber , experience  } = req.body
 
     if(!fullName || !email || !password || !specialization || !licenseNumber || !experience){
         throw new ApiError(400,"All Fields Are Required")
@@ -42,6 +42,7 @@ const registerDoctor = asyncHandler(async(req,res)=>{
         throw new ApiError(500,"Failed to upload profile picture")
     }
 
+    
     const doctor = await Doctor.create({
         fullName, 
         email,
