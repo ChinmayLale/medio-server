@@ -1,5 +1,4 @@
 import { User } from "../models/user.model.js";
-import { Pet } from "../models/pet.model.js";
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/ApiError.js'
 import {ApiResponse} from "../utils/ApiResponse.js"
@@ -9,8 +8,6 @@ import { uploadOnCloud } from "../../../Backend/src/utils/cloudinary.js";
 const generateTokens = async(userId)=>{
     try {
         const user = await User.findById(userId)
-        
-        
         const accessToken =await user.generateAccessToken()
         const refreshToken =await user.generateRefreshToken()
         // console.log(accessToken , refreshToken);
@@ -56,7 +53,6 @@ const registerUser = asyncHandler(async(req,res)=>{
     }
 
     const avatar = await uploadOnCloud(avatarLocalPath)
-    const coverImage = await uploadOnCloud(coverImageLocalPath)
 
     if(!avatar){
         throw new ApiError(400,"Avatar Upload Failed")
@@ -67,8 +63,7 @@ const registerUser = asyncHandler(async(req,res)=>{
         email,
         password,
         username:username.toLowerCase(),
-        avatar:avatar.url,
-        coverImage:coverImage?.url || ""
+        avatar:avatar.url
     })
 
     const createdUser = await User.findById(user._id).select(
@@ -83,7 +78,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     return res
         .status(201)
         .json(
-            new ApiResponse(200,createdUser , "User Registered Succesfully !")
+            new ApiResponse(200,createdUser , "User Registered Successfully !")
         )
 
 })
@@ -149,16 +144,11 @@ const logoutUser = asyncHandler(async(req,res)=>{
 })
 
 const getCurrentUser = asyncHandler(async(req, res) => {
-    const populatedUser = await req.user.populate({
-        path: 'pets',
-        select: 'name species breed age gender weight' // Include only these fields from the pet documents
-    });
-
     return res
     .status(200)
     .json(new ApiResponse(
         200,
-        populatedUser,
+        req.user,
         "User fetched successfully"
     ))
 })
