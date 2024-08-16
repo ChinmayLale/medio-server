@@ -4,7 +4,8 @@ import { uploadOnCloud } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import fs from "fs";
-
+import { MedicalRecord } from "../models/medicalRecords.model.js";
+import mongoose from "mongoose";
 
 
 const generateTokens = async(userId)=>{
@@ -149,8 +150,64 @@ const logoutDoctor = asyncHandler(async(req,res)=>{
 })
 
 
+const addMedicalReport = asyncHandler(async(req,res)=>{
+    const {patient , hospital , doctor , date , diagnosis , treatment , prescription , test} = req.body
+
+    if(!patient && !doctor && !hospital && !date && !diagnosis && !treatment && !prescription){
+        throw new ApiError(400,"All Fields Are Required")
+    }
+
+
+    if ([patient , hospital , doctor , diagnosis , treatment].some((field) => field.trim() === "")) {
+        throw new ApiError(400, "Empty fields are not allowed");
+    }
+
+    let patientId=""
+    let hospitalId=""
+    let doctorId=""
+    try {
+        patientId = new mongoose.Types.ObjectId(patient);
+        hospitalId = new mongoose.Types.ObjectId(hospital);
+        doctorId =new mongoose.Types.ObjectId(doctor);
+    } catch (error) {
+        console.log(error)
+        throw new ApiError(400, "Invalid ID format for patient, hospital, or doctor");
+    }
+
+    const prevRecord = await MedicalRecord.findOne({date})
+
+    if(prevRecord){
+        throw new ApiError(400,"Medical Record Already Exists For This Date , Update existing record")
+    }
+
+    const newRecord = await MedicalRecord.create({
+        patient:patientId,
+        hospital:hospitalId,
+        doctor:doctorId ,
+        date ,
+        diagnosis ,
+        treatment ,
+        prescription ,
+        test : test ? test : null
+    })
+
+    const createdRecord = await MedicalRecord.findById(newRecord._id).populate('patient','fullName').populate('doctor','fullName').populate('hospital','hospitalName');
+
+    if(!createdRecord){
+        throw new ApiError(500,"Error While Creating Record , Internal Server Error")
+    }
+
+    return res
+    .status(201)
+    .json(
+        new ApiResponse(201,createdRecord,"Medical Record Added Successfully")
+    )
+})
+
+
 export {
     registerDoctor,
     loginDoctor,
-    logoutDoctor
+    logoutDoctor,
+    addMedicalReport    
 }

@@ -1,5 +1,5 @@
 import mongoose , {Schema} from "mongoose";
-
+import { User } from "./user.model.js";
 
 const MedicalRecordSchema = new Schema(
     {
@@ -41,6 +41,20 @@ const MedicalRecordSchema = new Schema(
     }
 )
 
+
+MedicalRecordSchema.post("save",async function(doc,next) {
+    try {
+        await User.findByIdAndUpdate(
+            doc.patient,
+            { $addToSet: { medicalHistory: doc._id } }
+        )
+    } catch (error) {
+        console.error('Error updating User medicalHistory:', error);
+        // The MedicalRecord is already saved at this point
+    }
+    next()
+    
+})
 
 
 export const MedicalRecord = mongoose.model("MedicalRecord",MedicalRecordSchema)

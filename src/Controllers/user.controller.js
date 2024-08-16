@@ -154,11 +154,25 @@ const logoutUser = asyncHandler(async(req,res)=>{
 })
 
 const getCurrentUser = asyncHandler(async(req, res) => {
+    const populatedUser = await User.findById(req.user._id).select('-password -refreshToken -createdAt -updatedAt')
+        .populate({
+            path: 'medicalHistory',
+            select: 'doctor hospital date treatment prescription',
+            populate: [
+                { path: 'doctor', select: 'fullName' },
+                { path: 'hospital', select: 'hospitalName' }
+            ]
+        });
+
+    if (!populatedUser) {
+        throw new ApiError(404, "User not found");
+    }
+
     return res
     .status(200)
     .json(new ApiResponse(
         200,
-        req.user,
+        populatedUser,
         "User fetched successfully"
     ))
 })

@@ -29,6 +29,6 @@ export const verifyJwt = asyncHandler(async(req,res,next)=>{
     
         next()
     } catch (error) {
-        throw new ApiError(401 , "Somthing Went Wrong While Checking Token")
+        throw new ApiError(401 , "Something Went Wrong While Checking Token")
     }
 })

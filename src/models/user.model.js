@@ -46,10 +46,10 @@ const userSchema = new Schema(
             type: String,
             required: true
         },
-        medicalHistory:{
+        medicalHistory:[{
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'MedicalRecord'
-        },
+        }],
         refreshToken: {
             type: String,
         }
