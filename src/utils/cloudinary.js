@@ -13,7 +13,7 @@ cloudinary.config(
 
 
 
-const uploadOnCloudinary = async(localfilepath)=>{
+const uploadOnCloud = async(localfilepath)=>{
     try {
         if(!localfilepath) 
             return null
@@ -29,4 +29,4 @@ const uploadOnCloudinary = async(localfilepath)=>{
     }
 }
 
-export {uploadOnCloudinary}
+export {uploadOnCloud}

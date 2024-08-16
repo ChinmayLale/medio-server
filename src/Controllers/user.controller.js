@@ -2,7 +2,7 @@ import { User } from "../models/user.model.js";
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/ApiError.js'
 import {ApiResponse} from "../utils/ApiResponse.js"
-import { uploadOnCloud } from "../../../Backend/src/utils/cloudinary.js";
+import { uploadOnCloud } from "../utils/cloudinary.js";
 import fs from "fs"
 
 const generateTokens = async(userId)=>{

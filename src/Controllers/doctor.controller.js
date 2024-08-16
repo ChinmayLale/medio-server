@@ -1,6 +1,6 @@
 import { Doctor } from "../models/doctor.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloud } from "../../../Backend/src/utils/cloudinary.js";
+import { uploadOnCloud } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import fs from "fs";
@@ -23,7 +23,6 @@ const generateTokens = async(userId)=>{
         throw new ApiError(500 , "Something Went Wrong While Generating Tokens ")
     }
 }
-
 
 const registerDoctor = asyncHandler(async(req,res)=>{
     const {fullName , email , password , specialization , licenseNumber , experience   } = req.body
