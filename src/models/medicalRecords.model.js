@@ -5,15 +5,18 @@ const MedicalRecordSchema = new Schema(
     {
         patient:{
             type: Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'User',
+            index:true
         },
         hospital:{
             type: Schema.Types.ObjectId,
             ref: 'Hospital',
+            index:true
         },
         doctor:{
             type: Schema.Types.ObjectId,
             ref: 'Doctor',
+            index:true
         },
         date:{
             type:Date,

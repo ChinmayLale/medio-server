@@ -6,7 +6,8 @@ import bcrypt from "bcrypt"
 const doctorSchema = new Schema({
     fullName: { 
         type: String, 
-        required: true 
+        required: true,
+        index: true
     },
     email: { 
         type: String, 
