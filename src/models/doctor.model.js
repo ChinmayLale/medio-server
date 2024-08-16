@@ -60,6 +60,10 @@ doctorSchema.pre("save",async function(next){
     next()
 })
 
+doctorSchema.methods.isPasswordCorrect = async function (password){
+    return await bcrypt.compare(password,this.password)
+}
+
 doctorSchema.methods.generateAccessToken = async function (){
     return jwt.sign(
         {
