@@ -1,5 +1,8 @@
 import mongoose , {Schema} from "mongoose";
 import { User } from "./user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+
+
 
 const MedicalRecordSchema = new Schema(
     {
@@ -54,6 +57,7 @@ MedicalRecordSchema.post("save",async function(doc,next) {
     } catch (error) {
         console.error('Error updating User medicalHistory:', error);
         // The MedicalRecord is already saved at this point
+        throw new ApiError(401,"Error Updating Medical History...")
     }
     next()
     

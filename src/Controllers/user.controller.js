@@ -2,8 +2,11 @@ import { User } from "../models/user.model.js";
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/ApiError.js'
 import {ApiResponse} from "../utils/ApiResponse.js"
+import jwt from "jsonwebtoken"
 import { uploadOnCloud } from "../utils/cloudinary.js";
 import fs from "fs"
+
+
 
 const generateTokens = async(userId)=>{
     try {
@@ -113,7 +116,7 @@ const loginUser = asyncHandler(async(req,res)=>{
 
    const {accessToken , refreshToken} = await generateTokens(user._id)
 
-   const loggedInUser = await User.findById(user._id)
+   const loggedInUser = await User.findById(user._id).select("-password")
 
    const options = {
         httpOnly:true,
@@ -177,11 +180,44 @@ const getCurrentUser = asyncHandler(async(req, res) => {
     ))
 })
 
+const refreshAccessToken = asyncHandler(async(req,res)=>{
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    if(!incomingRefreshToken){
+        throw new ApiError(401,"No refresh token provided")
+    }
+
+    const oldRefreshToken =  jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET)
+
+    const user = await User.findById(oldRefreshToken?._id)
+
+    if(!user){
+        throw new ApiError(404,"Invalid Refresh Token")
+    }
+
+    if(user?.refreshToken != incomingRefreshToken){
+        throw new ApiError(401,"Invalid Refresh Token")
+    }
+
+    const {accessToken , refreshToken} =await generateTokens(user._id);
+
+    const options = {
+        httpOnly: true,
+        secure:true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken",accessToken,options)
+    .cookie("refreshToken",refreshToken,options)
+    .json(new ApiResponse(200 , {accessToken,refreshToken},"Access Token Refreshed"))
+})
 
 
 export {
     registerUser,
     loginUser,
     logoutUser,
-    getCurrentUser
+    getCurrentUser,
+    refreshAccessToken
 }
