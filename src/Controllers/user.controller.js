@@ -5,6 +5,10 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
 import { uploadOnCloud } from "../utils/cloudinary.js";
 import fs from "fs"
+import { Appointment } from "../models/appointment.model.js";
+import { Doctor } from "../models/doctor.model.js";
+import { Hospital } from "../models/hospital.model.js";
+import mongoose from "mongoose";
 
 
 
@@ -49,10 +53,6 @@ const registerUser = asyncHandler(async(req,res)=>{
     // console.log(await req.files.avatar)
     const avatarLocalPath = await req.files?.avatar?.[0]?.path || null;
     // const coverImageLocalPath = await req.files?.coverImage[0]?.path || null;
-    
-
-
-
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file Is Required")
     }
@@ -180,6 +180,54 @@ const getCurrentUser = asyncHandler(async(req, res) => {
     ))
 })
 
+const getAppointment = asyncHandler(async(req,res) => {
+    const {dateAndTime , doctorId , hospitalId , description } = req.body;
+    const userId = req.user._id;
+    if(!dateAndTime || !doctorId || !hospitalId ||  !description || description?.length<1 || !userId){
+        throw new ApiError(400 , "All Fields Are Required");
+    }
+    if (!mongoose.Types.ObjectId.isValid(doctorId) ||!mongoose.Types.ObjectId.isValid(hospitalId) ) {
+        throw new ApiError(400, "Invalid doctorId or hospitalId format");
+    }
+
+    const doctor = await Doctor.findById(doctorId);
+    const hospital = await Hospital.findById(hospitalId);
+
+    if(!doctor || !hospital){
+        throw new ApiError(404, "Doctor or Hospital not found");
+    }
+
+
+    const isValidISODate = (dateString) => {
+        const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+        return isoRegex.test(dateString);
+    };
+    if(!isValidISODate(dateAndTime)){
+        throw new Error("Invalid date format. Use ISO 8601 format: YYYY-MM-DD::T::HH:MM:SSZ");
+    }
+
+    const appointment = await Appointment.create({
+        user:userId,
+        doctor:doctorId,
+        hospital:hospitalId,
+        date:dateAndTime,
+        status:"pending",
+        reason:description,
+    })
+
+    const registeredAppointment = await  Appointment.findById(appointment._id).select("-user");
+
+    if(!registeredAppointment){
+        throw new ApiError(500 , "Internal Server Error While Registering appointment")
+    }
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(201,registeredAppointment , "Appointment Registered Successfully !")
+        )
+})
+
 const refreshAccessToken = asyncHandler(async(req,res)=>{
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
@@ -219,5 +267,6 @@ export {
     loginUser,
     logoutUser,
     getCurrentUser,
+    getAppointment,
     refreshAccessToken
 }
