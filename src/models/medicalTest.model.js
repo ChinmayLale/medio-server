@@ -1,6 +1,7 @@
 import mongoose , {mongo, Schema} from "mongoose";
 
 
+
 const MedicalTestSchema = new Schema(
     {
         testName: { 
@@ -16,12 +17,14 @@ const MedicalTestSchema = new Schema(
         },
         labName: { 
             type: String 
-        },
+        }
     },
     { 
         timestamps: true 
     }
 );
+
+
 
 
 
