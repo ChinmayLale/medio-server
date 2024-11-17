@@ -7,6 +7,7 @@ import fs from "fs";
 import { MedicalRecord } from "../models/medicalRecords.model.js";
 import mongoose from "mongoose";
 import { Medicaltest } from "../models/medicalTest.model.js";
+import { Appointment } from "../models/appointment.model.js";
 
 
 const generateTokens = async (userId) => {
@@ -219,13 +220,55 @@ const addMedicalReport = asyncHandler(async (req, res) => {
         )
 })
 
-const updateMedicalReport = asyncHandler(async ( req , res)=>{
-    const { reportId } = req.body;
+const getAllAppointments = asyncHandler(async ( req , res)=>{
+    const userId = req.user._id;
+    const appointments = await Appointment.find({doctor:userId})
+        .populate({
+            path: 'user',
+            select: '-password -date_of_birth -refreshToken -username  -medicalHistory -createdAt -updatedAt' 
+        })
+        .populate({
+            path: 'hospital',
+            select: '-password -departments -registeredPatients -licenseNumber -createdAt -updatedAt' 
+        }).select('-doctor');
+    if(!appointments){
+        throw new ApiError(404, "No Appointments Found")
+    }
+    return res.status(200)
+    .json(
+        new ApiResponse(200, appointments, "All Appointments Retrieved Successfully")
+    )
+})
+
+const toggleAppointmentStatus = asyncHandler(async(req , res)=>{
+    const {appointmentId , status} = req.body;
+    if(!appointmentId || !status){
+        throw new ApiError(400, "Appointment ID is Required");
+    }
+    const appointment = await Appointment.findById(appointmentId);
+    if(!appointment){
+        throw new ApiError(404, "Appointment Not Found")
+    }
+    const allStatus = ["pending", "confirmed", "cancelled", "completed"]
+    if(!allStatus.includes(status)){
+        throw new ApiError(400, "Invalid Status")
+    }
+    if(!status==="pending" || !status==="confirmed"){
+        throw new ApiError(400, "Can't Change Status for Completed or Cancelled appointments")
+    }
+    appointment.status = status;
+    await appointment.save();
+    return res.status(200)
+    .json(
+        new ApiResponse(200, appointment, "Appointment Status Updated Successfully")
+    )
 })
 
 export {
     registerDoctor,
     loginDoctor,
     logoutDoctor,
-    addMedicalReport
+    addMedicalReport,
+    getAllAppointments,
+    toggleAppointmentStatus
 }

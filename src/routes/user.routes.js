@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser , loginUser , logoutUser , getCurrentUser, refreshAccessToken, getAppointment } from "../Controllers/user.controller.js";
+import { registerUser , loginUser , logoutUser , getCurrentUser, refreshAccessToken, getAppointment, getPastAppointments } from "../Controllers/user.controller.js";
 import {upload} from '../middlewares/multer.middleware.js'
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 
@@ -25,10 +25,11 @@ router.route("/register").post(
 router.route("/login").post(loginUser)
 
 //secured routes
-router.route('/refresh-token').post(refreshAccessToken)
-router.route('/myAccount').post(verifyJwt , getCurrentUser)
-router.route('/getAppointment').post( verifyJwt, getAppointment )
-router.route("/logout").post(verifyJwt,  logoutUser)
+router.route('/refresh-token').post(refreshAccessToken);
+router.route('/myAccount').post(verifyJwt , getCurrentUser);
+router.route('/bookAppointment').post( verifyJwt, getAppointment );
+router.route('/appointmentHistory').get(verifyJwt , getPastAppointments);
+router.route("/logout").post(verifyJwt,  logoutUser);
 
 
 

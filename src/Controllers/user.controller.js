@@ -228,6 +228,17 @@ const getAppointment = asyncHandler(async(req,res) => {
         )
 })
 
+const getPastAppointments = asyncHandler(async(req,res) => {
+    const userId = req.user._id;
+    const appointments = await Appointment.find({user:userId}).select("-user");
+    if(!appointments || appointments.length<1){
+        throw new ApiError(404, "No Past Appointments Found");
+    }
+    return res
+    .status(200)
+    .json(new ApiResponse(200,appointments,"Past Appointments Retrieved Successfully !"))
+})
+
 const refreshAccessToken = asyncHandler(async(req,res)=>{
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
@@ -268,5 +279,6 @@ export {
     logoutUser,
     getCurrentUser,
     getAppointment,
+    getPastAppointments,
     refreshAccessToken
 }
