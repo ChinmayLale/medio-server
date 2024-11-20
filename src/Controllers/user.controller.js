@@ -228,6 +228,20 @@ const getAppointment = asyncHandler(async(req,res) => {
         )
 })
 
+const getDoctorByName = asyncHandler(async(req,res)=>{
+    const {name} = req.body;
+    if(!name || name.length < 1){
+        throw new ApiError(400 , "Name is required");
+    }
+    const doctor = await Doctor.findOne({fullName:name}).select("-password -patients -refreshToken");
+    if(!doctor){
+        throw new ApiError(404 , "Doctor not found");
+    }
+    return res
+    .status(200)
+    .json(new ApiResponse(200,doctor,"Doctor Found"))
+})
+
 const getPastAppointments = asyncHandler(async(req,res) => {
     const userId = req.user._id;
     const appointments = await Appointment.find({user:userId}).select("-user");
@@ -280,5 +294,6 @@ export {
     getCurrentUser,
     getAppointment,
     getPastAppointments,
+    getDoctorByName,
     refreshAccessToken
 }

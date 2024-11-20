@@ -151,7 +151,6 @@ const logoutDoctor = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "User Logged Out"))
 })
 
-
 const addMedicalReport = asyncHandler(async (req, res) => {
     const { patient, hospital, doctor, date, diagnosis, treatment, prescription, test } = req.body
 
@@ -263,6 +262,7 @@ const toggleAppointmentStatus = asyncHandler(async(req , res)=>{
         new ApiResponse(200, appointment, "Appointment Status Updated Successfully")
     )
 })
+
 
 export {
     registerDoctor,
