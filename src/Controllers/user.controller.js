@@ -9,6 +9,7 @@ import { Appointment } from "../models/appointment.model.js";
 import { Doctor } from "../models/doctor.model.js";
 import { Hospital } from "../models/hospital.model.js";
 import mongoose from "mongoose";
+import { MedicalRecord } from "../models/medicalRecords.model.js";
 
 
 
@@ -286,6 +287,35 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200 , {accessToken,refreshToken},"Access Token Refreshed"))
 })
 
+let cache_medical_reports = [];
+let cache_user_id
+setTimeout(()=>{
+    cache_medical_reports = [];
+    cache_user_id = null;
+},5000)
+const getAllMedicalReports = asyncHandler(async(req,res)=>{
+    const userId = req.user._id;
+    if(!userId){
+        throw new ApiError(401,"User Id Not Found In request")
+    }
+    if(cache_user_id === userId){
+        return res
+        .status(200)
+        .json(new ApiResponse(200,cache_medical_reports,"Medical Reports Sent From Cache Retrieved Successfully !"))
+    }
+
+    const allReports = await MedicalRecord.find({patient:userId}).populate('doctor', 'fullName').populate('hospital', 'hospitalName');
+    if(!allReports || allReports.length<1){
+        throw new ApiError(404, "No Medical Reports Found");
+    }
+    cache_medical_reports = allReports;
+    cache_user_id = userId;
+    return res
+    .status(200)
+    .json(new ApiResponse(200,allReports,"Medical Reports Retrieved Successfully !"))
+
+})
+
 
 export {
     registerUser,
@@ -295,5 +325,6 @@ export {
     getAppointment,
     getPastAppointments,
     getDoctorByName,
+    getAllMedicalReports,
     refreshAccessToken
 }

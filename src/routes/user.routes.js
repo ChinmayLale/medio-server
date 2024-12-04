@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser , loginUser , logoutUser , getCurrentUser, refreshAccessToken, getAppointment, getPastAppointments, getDoctorByName } from "../Controllers/user.controller.js";
+import { registerUser , loginUser , logoutUser , getCurrentUser, refreshAccessToken, getAppointment, getPastAppointments, getDoctorByName, getAllMedicalReports } from "../Controllers/user.controller.js";
 import {upload} from '../middlewares/multer.middleware.js'
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 
@@ -29,7 +29,8 @@ router.route('/refresh-token').post(refreshAccessToken);
 router.route('/myAccount').post(verifyJwt , getCurrentUser);
 router.route('/bookAppointment').post( verifyJwt, getAppointment );
 router.route('/appointmentHistory').get(verifyJwt , getPastAppointments);
-router.route('/searchdoctor').get(verifyJwt , getDoctorByName);
+router.route('/getDoctorByName').get(verifyJwt , getDoctorByName);
+router.route('/allReports').get(verifyJwt , getAllMedicalReports);
 router.route("/logout").post(verifyJwt,  logoutUser);
 
 
